@@ -721,7 +721,7 @@ function drawIntro() {
   ctx.fillStyle = colors.muted;
   ctx.font = "500 14px Inter, Arial, sans-serif";
   drawRule("\u2190 \u2192", "\u043C\u0435\u043D\u044F\u0439 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435", 52, 524);
-  drawRule("\u25CF", "\u043B\u043E\u0432\u0438 \u0431\u043B\u043E\u043A\u0438", 52, 553);
+  drawRule("\u25CF", "\u0441\u043E\u0431\u0438\u0440\u0430\u0439 \u0431\u043B\u043E\u043A\u0438", 52, 553);
   drawRule("!", "\u043E\u0431\u044A\u0435\u0437\u0436\u0430\u0439 \u043F\u0440\u0435\u043F\u044F\u0442\u0441\u0442\u0432\u0438\u044F", 52, 582);
 
   drawMiniRoad(268, 426);
@@ -757,7 +757,9 @@ function drawHeroPlate(x, y, w, h) {
   ctx.closePath();
   ctx.fill();
 
-  const blobGradient = ctx.createRadialGradient(x + w * 0.57, y + 66, 8, x + w * 0.56, y + 66, 118);
+  const markX = x + w * 0.5;
+  const markY = y + 73;
+  const blobGradient = ctx.createRadialGradient(markX + 18, markY - 10, 8, markX, markY, 112);
   blobGradient.addColorStop(0, "#36f3ff");
   blobGradient.addColorStop(0.36, "#1190ff");
   blobGradient.addColorStop(0.76, "#0734ff");
@@ -766,24 +768,24 @@ function drawHeroPlate(x, y, w, h) {
   ctx.shadowColor = "#0d8cff";
   ctx.shadowBlur = 32;
   ctx.save();
-  ctx.translate(x + w * 0.55, y + 70);
-  ctx.rotate(-0.16);
+  ctx.translate(markX, markY);
+  ctx.rotate(-0.14);
   ctx.beginPath();
-  ctx.ellipse(0, 0, 110, 39, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 0, 98, 38, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
   ctx.shadowBlur = 0;
 
   ctx.fillStyle = "#f3fbff";
   ctx.beginPath();
-  ctx.moveTo(x + w * 0.55, y + 42);
-  ctx.lineTo(x + w * 0.58, y + 66);
-  ctx.lineTo(x + w * 0.64, y + 74);
-  ctx.lineTo(x + w * 0.58, y + 82);
-  ctx.lineTo(x + w * 0.55, y + 108);
-  ctx.lineTo(x + w * 0.52, y + 82);
-  ctx.lineTo(x + w * 0.46, y + 74);
-  ctx.lineTo(x + w * 0.52, y + 66);
+  ctx.moveTo(markX, markY - 46);
+  ctx.lineTo(markX + 16, markY - 9);
+  ctx.lineTo(markX + 54, markY);
+  ctx.lineTo(markX + 16, markY + 9);
+  ctx.lineTo(markX, markY + 46);
+  ctx.lineTo(markX - 16, markY + 9);
+  ctx.lineTo(markX - 54, markY);
+  ctx.lineTo(markX - 16, markY - 9);
   ctx.closePath();
   ctx.fill();
 
