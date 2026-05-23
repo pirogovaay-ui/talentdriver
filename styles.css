@@ -1,0 +1,128 @@
+:root {
+  --deep: #050a1c;
+  --panel: #080f25;
+  --line: rgba(206, 222, 255, 0.26);
+  --text: #f3f6ff;
+  --muted: rgba(243, 246, 255, 0.7);
+  --blue: #1d6bff;
+  --cyan: #48caff;
+  --button: #a8c7ff;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #020614;
+  color: var(--text);
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+body {
+  display: grid;
+  place-items: center;
+}
+
+.game-shell {
+  position: relative;
+  width: min(100vw, calc(100svh * 390 / 844), 480px);
+  height: min(100svh, calc(100vw * 844 / 390), 920px);
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  background: var(--deep);
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.start-button,
+.continue-button {
+  position: absolute;
+  left: 50%;
+  bottom: calc(120px + env(safe-area-inset-bottom));
+  z-index: 2;
+  width: min(238px, 64vw);
+  height: 54px;
+  border: 1px solid rgba(206, 222, 255, 0.72);
+  border-radius: 999px;
+  background: var(--button);
+  color: #061027;
+  font: 800 17px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0;
+  transform: translateX(-50%);
+  box-shadow: 0 12px 34px rgba(29, 107, 255, 0.24);
+}
+
+.continue-button {
+  width: min(310px, 78vw);
+  font-size: 16px;
+}
+
+.start-button.hidden,
+.continue-button.hidden {
+  display: none;
+}
+
+.controls {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.controls.hidden {
+  display: none;
+}
+
+.control-button {
+  width: 100%;
+  height: 70px;
+  border: 1px solid rgba(206, 222, 255, 0.58);
+  border-radius: 999px;
+  background: rgba(5, 10, 28, 0.58);
+  color: var(--text);
+  font: 800 24px/1 "Inter", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0;
+  pointer-events: auto;
+  backdrop-filter: blur(10px);
+  touch-action: none;
+}
+
+.control-button:active,
+.control-button.pressed {
+  background: rgba(72, 202, 255, 0.9);
+  color: #050a1c;
+}
+
+@media (min-width: 760px) {
+  body {
+    background:
+      radial-gradient(circle at center, rgba(29, 107, 255, 0.18), transparent 36%),
+      #020614;
+  }
+
+  .game-shell {
+    height: min(100svh, 880px);
+    width: min(480px, calc(100svh * 390 / 844));
+    border: 1px solid rgba(206, 222, 255, 0.18);
+  }
+}
