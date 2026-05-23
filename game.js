@@ -629,23 +629,6 @@ function drawIntro() {
   ctx.fillStyle = introGlow;
   ctx.fillRect(0, 0, base.w, base.h);
 
-  if (finalBg.complete && finalBg.naturalWidth) {
-    const x = 0;
-    const y = 190;
-    const w = base.w;
-    const h = 154;
-    ctx.save();
-    ctx.globalAlpha = 0.96;
-    ctx.drawImage(finalBg, 0, 160, 1280, 250, x, y, w, h);
-    const fade = ctx.createLinearGradient(0, y, 0, y + h);
-    fade.addColorStop(0, "rgba(5, 10, 28, 0.38)");
-    fade.addColorStop(0.42, "rgba(5, 10, 28, 0)");
-    fade.addColorStop(1, "rgba(5, 10, 28, 0.5)");
-    ctx.fillStyle = fade;
-    ctx.fillRect(x, y, w, h);
-    ctx.restore();
-  }
-
   ctx.fillStyle = colors.text;
   ctx.font = "700 42px Inter, Arial, sans-serif";
   ctx.fillText("Talent", 38, 86);
@@ -655,6 +638,8 @@ function drawIntro() {
   ctx.font = "500 13px Inter, Arial, sans-serif";
   ctx.fillText("\u041F\u043E\u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0439 \u0441\u0435\u0431\u044F \u0437\u0430 \u0440\u0443\u043B\u0451\u043C", 40, 164);
   ctx.fillText("Talent Development Machine", 40, 183);
+
+  drawHeroPlate(28, 214, 334, 122);
 
   ctx.fillStyle = "rgba(8, 17, 38, 0.9)";
   roundRect(28, 390, 334, 224, 24);
@@ -677,6 +662,82 @@ function drawIntro() {
   drawRule("\u25A3", "\u043F\u0440\u043E\u0441\u043A\u0430\u043A\u0438\u0432\u0430\u0439 \u0432 \u0432\u043E\u0440\u043E\u0442\u0430", 52, 594);
 
   drawMiniRoad(268, 438);
+  ctx.restore();
+}
+
+function drawHeroPlate(x, y, w, h) {
+  ctx.save();
+  roundRect(x, y, w, h, 22);
+  ctx.clip();
+  const bgGradient = ctx.createLinearGradient(x, y, x + w, y + h);
+  bgGradient.addColorStop(0, "#050a1c");
+  bgGradient.addColorStop(0.58, "#071332");
+  bgGradient.addColorStop(1, "#030716");
+  ctx.fillStyle = bgGradient;
+  ctx.fillRect(x, y, w, h);
+
+  const horizonY = y + 48;
+  const band = ctx.createLinearGradient(x, horizonY, x + w, horizonY + 34);
+  band.addColorStop(0, "#0b49ff");
+  band.addColorStop(0.5, "#20d8ff");
+  band.addColorStop(1, "#0751ff");
+  ctx.fillStyle = band;
+  ctx.fillRect(x, horizonY, w, 34);
+
+  ctx.fillStyle = "rgba(5, 10, 28, 0.58)";
+  ctx.beginPath();
+  ctx.moveTo(x, horizonY + 34);
+  for (let i = 0; i <= 11; i += 1) {
+    const px = x + (w / 10) * i;
+    const py = horizonY + 18 + ((i * 17) % 24);
+    ctx.lineTo(px, py);
+  }
+  ctx.lineTo(x + w, horizonY + 34);
+  ctx.closePath();
+  ctx.fill();
+
+  const blobGradient = ctx.createRadialGradient(x + 190, y + 54, 8, x + 192, y + 52, 86);
+  blobGradient.addColorStop(0, "#2df3ff");
+  blobGradient.addColorStop(0.34, "#148cff");
+  blobGradient.addColorStop(0.78, "#082aff");
+  blobGradient.addColorStop(1, "#020b3d");
+  ctx.fillStyle = blobGradient;
+  ctx.shadowColor = "#0a77ff";
+  ctx.shadowBlur = 24;
+  ctx.save();
+  ctx.translate(x + 192, y + 56);
+  ctx.rotate(-0.2);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 76, 30, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = "#f3fbff";
+  ctx.beginPath();
+  ctx.moveTo(x + 198, y + 38);
+  ctx.lineTo(x + 205, y + 57);
+  ctx.lineTo(x + 224, y + 64);
+  ctx.lineTo(x + 205, y + 71);
+  ctx.lineTo(x + 198, y + 90);
+  ctx.lineTo(x + 191, y + 71);
+  ctx.lineTo(x + 172, y + 64);
+  ctx.lineTo(x + 191, y + 57);
+  ctx.closePath();
+  ctx.fill();
+
+  const fade = ctx.createLinearGradient(x, y, x, y + h);
+  fade.addColorStop(0, "rgba(5, 10, 28, 0.04)");
+  fade.addColorStop(1, "rgba(5, 10, 28, 0.55)");
+  ctx.fillStyle = fade;
+  ctx.fillRect(x, y, w, h);
+  ctx.restore();
+
+  ctx.save();
+  ctx.strokeStyle = "rgba(72, 202, 255, 0.22)";
+  ctx.lineWidth = 1.5;
+  roundRect(x, y, w, h, 22);
+  ctx.stroke();
   ctx.restore();
 }
 
