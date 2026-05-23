@@ -41,7 +41,7 @@ const world = {
   crashed: false,
   lastTime: 0,
   distance: 0,
-  speed: 142,
+  speed: 284,
   targetLane: 1,
   found: new Set(),
   lives: 3,
@@ -87,7 +87,7 @@ function resetGame() {
   world.crashed = false;
   world.lastTime = performance.now();
   world.distance = 0;
-  world.speed = 142;
+  world.speed = 284;
   world.targetLane = 1;
   world.found = new Set();
   world.lives = 3;
@@ -214,7 +214,7 @@ function update(dt) {
 
   world.distance += world.speed * dt;
   world.scroll = (world.scroll + world.speed * dt) % 92;
-  world.speed = Math.min(282, world.speed + dt * (5.4 + world.found.size * 0.62));
+  world.speed = Math.min(520, world.speed + dt * (7.6 + world.found.size * 1.2));
   world.labelTimer = Math.max(0, world.labelTimer - dt);
   world.hitShake = Math.max(0, world.hitShake - dt);
   world.invincible = Math.max(0, world.invincible - dt);
@@ -262,6 +262,7 @@ function update(dt) {
       world.found.add(object.index);
       world.score += 120 + world.combo * 30;
       world.combo = Math.min(9, world.combo + 1);
+      world.speed = Math.min(520, world.speed + 34);
       world.label = blockNames[object.index];
       world.labelTimer = 0;
       world.pausedForBlock = true;
@@ -279,13 +280,13 @@ function update(dt) {
       world.combo = 1;
       world.invincible = 1.1;
       world.speed = Math.max(128, world.speed - 34);
-      world.label = "\u0423\u0414\u0410\u0420 \u041E \u0421\u0422\u0415\u041D\u0423";
+      world.label = "УДАР О СТЕНУ";
       world.labelTimer = 0.8;
       world.hitShake = 0.38;
       car.x = lanes[world.targetLane] + (Math.random() > 0.5 ? 8 : -8);
       if (world.lives <= 0) {
         world.crashed = true;
-        startButton.textContent = "\u0415\u0429\u0401 \u0420\u0410\u0417";
+        startButton.textContent = "ЕЩЁ РАЗ";
         startButton.classList.remove("hidden");
       }
     }
@@ -570,12 +571,12 @@ function drawLabel() {
   ctx.fillStyle = "rgba(5, 10, 28, 0.82)";
   roundRect(28, 108, 334, 58, 18);
   ctx.fill();
-  ctx.strokeStyle = world.label === "\u0423\u0414\u0410\u0420 \u041E \u0421\u0422\u0415\u041D\u0423" ? "rgba(255, 107, 107, 0.7)" : "rgba(72, 202, 255, 0.48)";
+  ctx.strokeStyle = world.label === "УДАР О СТЕНУ" ? "rgba(255, 107, 107, 0.7)" : "rgba(72, 202, 255, 0.48)";
   ctx.stroke();
-  ctx.fillStyle = world.label === "\u0423\u0414\u0410\u0420 \u041E \u0421\u0422\u0415\u041D\u0423" ? colors.warning : colors.cyan;
+  ctx.fillStyle = world.label === "УДАР О СТЕНУ" ? colors.warning : colors.cyan;
   ctx.font = "800 11px Inter, Arial, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(world.label === "\u0423\u0414\u0410\u0420 \u041E \u0421\u0422\u0415\u041D\u0423" ? "CRASH" : "BLOCK FOUND", base.w / 2, 130);
+  ctx.fillText(world.label === "УДАР О СТЕНУ" ? "CRASH" : "BLOCK FOUND", base.w / 2, 130);
   ctx.fillStyle = colors.text;
   ctx.font = "700 15px Inter, Arial, sans-serif";
   ctx.fillText(world.label, base.w / 2, 153);
@@ -697,8 +698,8 @@ function drawIntro() {
   ctx.fillStyle = colors.muted;
   ctx.font = "500 12px Inter, Arial, sans-serif";
   ctx.textAlign = "right";
-  ctx.fillText("\u041F\u043E\u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0439 \u0441\u0435\u0431\u044F", 360, 78);
-  ctx.fillText("\u0437\u0430 \u0440\u0443\u043B\u0451\u043C Talent", 360, 96);
+  ctx.fillText("Почувствуй себя", 360, 78);
+  ctx.fillText("за рулём Talent", 360, 96);
   ctx.fillText("Development Machine", 360, 114);
   ctx.textAlign = "left";
 
@@ -715,14 +716,14 @@ function drawIntro() {
   ctx.fillText("MISSION", 52, 412);
   ctx.fillStyle = colors.text;
   ctx.font = "800 27px Inter, Arial, sans-serif";
-  ctx.fillText("\u0421\u043E\u0431\u0435\u0440\u0438 7", 52, 450);
-  ctx.fillText("TDM-\u0431\u043B\u043E\u043A\u043E\u0432", 52, 484);
+  ctx.fillText("Собери 7", 52, 450);
+  ctx.fillText("TDM-блоков", 52, 484);
 
   ctx.fillStyle = colors.muted;
   ctx.font = "500 14px Inter, Arial, sans-serif";
-  drawRule("\u2190 \u2192", "\u043C\u0435\u043D\u044F\u0439 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435", 52, 524);
-  drawRule("\u25CF", "\u0441\u043E\u0431\u0438\u0440\u0430\u0439 \u0431\u043B\u043E\u043A\u0438", 52, 553);
-  drawRule("!", "\u043E\u0431\u044A\u0435\u0437\u0436\u0430\u0439 \u043F\u0440\u0435\u043F\u044F\u0442\u0441\u0442\u0432\u0438\u044F", 52, 582);
+  drawRule("← →", "меняй направление", 52, 524);
+  drawRule("●", "собирай блоки", 52, 553);
+  drawRule("!", "объезжай препятствия", 52, 582);
 
   drawMiniRoad(268, 426);
   ctx.restore();
@@ -803,7 +804,7 @@ function drawRule(mark, text, x, y) {
   ctx.fillStyle = "rgba(72, 202, 255, 0.16)";
   roundRect(x, y - 17, 42, 22, 11);
   ctx.fill();
-  ctx.fillStyle = mark === "\u25A3" ? colors.warning : colors.cyan;
+  ctx.fillStyle = mark === "▣" ? colors.warning : colors.cyan;
   ctx.font = "800 12px Inter, Arial, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(mark, x + 21, y - 2);
@@ -865,10 +866,10 @@ function drawEndState() {
     ctx.fillStyle = colors.text;
     ctx.font = "800 34px Inter, Arial, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("\u0415\u0429\u0401 \u0420\u0410\u0417", base.w / 2, 318);
+    ctx.fillText("ЕЩЁ РАЗ", base.w / 2, 318);
     ctx.fillStyle = colors.muted;
     ctx.font = "400 15px Inter, Arial, sans-serif";
-    ctx.fillText("\u0441\u043E\u0445\u0440\u0430\u043D\u044F\u0435\u043C \u0444\u043E\u043A\u0443\u0441 \u0438 \u0435\u0434\u0435\u043C \u0434\u0430\u043B\u044C\u0448\u0435", base.w / 2, 350);
+    ctx.fillText("сохраняем фокус и едем дальше", base.w / 2, 350);
     ctx.restore();
     return;
   }
@@ -975,8 +976,8 @@ controlButtons.forEach((button) => {
   });
 });
 
-startButton.textContent = "\u041F\u041E\u0415\u0425\u0410\u041B\u0418";
-continueButton.textContent = "\u041F\u041E\u0415\u0425\u0410\u041B\u0418 \u0414\u0410\u041B\u042C\u0428\u0415";
+startButton.textContent = "ПОЕХАЛИ";
+continueButton.textContent = "ПОЕХАЛИ ДАЛЬШЕ";
 startButton.addEventListener("click", resetGame);
 continueButton.addEventListener("click", () => {
   if (!world.pausedForBlock) return;
@@ -989,8 +990,8 @@ continueButton.addEventListener("click", () => {
       if (world.started && !world.crashed) {
         world.won = true;
         world.pausedForBlock = false;
-        startButton.textContent = "\u0415\u0429\u0401 \u0420\u0410\u0417";
-        startButton.classList.remove("hidden");
+        startButton.classList.add("hidden");
+        controls.classList.add("hidden");
       }
     }, 760);
   }
@@ -999,7 +1000,7 @@ continueButton.addEventListener("click", () => {
 fitCanvas();
 world.started = false;
 world.lastTime = performance.now();
-startButton.textContent = "\u041F\u041E\u0415\u0425\u0410\u041B\u0418";
+startButton.textContent = "ПОЕХАЛИ";
 startButton.classList.remove("hidden");
 controls.classList.add("hidden");
 
@@ -1007,7 +1008,7 @@ if (new URLSearchParams(window.location.search).get("final") === "1") {
   world.started = true;
   world.won = true;
   world.found = new Set(blockNames.map((_, index) => index));
-  startButton.textContent = "\u0415\u0429\u0401 \u0420\u0410\u0417";
+  startButton.textContent = "ЕЩЁ РАЗ";
   startButton.classList.remove("hidden");
   controls.classList.remove("hidden");
 }
