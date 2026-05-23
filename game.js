@@ -118,7 +118,26 @@ function resetGame() {
 function spawnBlock() {
   if (world.blockQueue.length === 0) return;
   const blockIndex = world.blockQueue.shift();
-  const safeLane = Math.floor(Math.random() * lanes.length);
+  const laneScores = lanes.map((_, lane) => {
+    return objects.reduce((score, object) => {
+      if (object.type !== "wall") return score;
+      const verticalGap = Math.abs(object.y + 64);
+      const sameLane = object.lane === lane;
+      const nearLane = Math.abs(object.lane - lane) === 1;
+      if (sameLane && verticalGap < 260) return score + 100;
+      if (nearLane && verticalGap < 150) return score + 24;
+      return score;
+    }, Math.random());
+  });
+  const safeLane = laneScores.indexOf(Math.min(...laneScores));
+  objects = objects.filter((object) => {
+    if (object.type !== "wall") return true;
+    const sameLane = object.lane === safeLane;
+    const nearLane = Math.abs(object.lane - safeLane) === 1;
+    if (sameLane && object.y > -260 && object.y < 190) return false;
+    if (nearLane && object.y > -130 && object.y < 120) return false;
+    return true;
+  });
   objects.push({
     type: "block",
     index: blockIndex,
@@ -135,7 +154,7 @@ function spawnBlock() {
       type: "wall",
       lane: obstacleLane,
       x: lanes[obstacleLane],
-      y: -260,
+      y: -360,
       w: 68,
       h: 58,
     });
@@ -189,7 +208,7 @@ function update(dt) {
 
   world.distance += world.speed * dt;
   world.scroll = (world.scroll + world.speed * dt) % 92;
-  world.speed = Math.min(236, world.speed + dt * (3.1 + world.found.size * 0.25));
+  world.speed = Math.min(282, world.speed + dt * (5.4 + world.found.size * 0.62));
   world.labelTimer = Math.max(0, world.labelTimer - dt);
   world.hitShake = Math.max(0, world.hitShake - dt);
   world.invincible = Math.max(0, world.invincible - dt);
@@ -387,26 +406,45 @@ function drawBlock(block) {
 function drawWall(object) {
   ctx.save();
   ctx.translate(object.x, object.y);
-  ctx.shadowColor = "rgba(255, 107, 107, 0.45)";
-  ctx.shadowBlur = 14;
-  ctx.fillStyle = "rgba(68, 80, 96, 0.96)";
-  ctx.strokeStyle = "rgba(243, 246, 255, 0.55)";
-  ctx.lineWidth = 3;
-  roundRect(-object.w / 2, -object.h / 2, object.w, object.h, 8);
+  ctx.shadowColor = "rgba(255, 76, 86, 0.6)";
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = "rgba(18, 25, 41, 0.98)";
+  ctx.strokeStyle = "rgba(255, 116, 126, 0.95)";
+  ctx.lineWidth = 3.5;
+  roundRect(-object.w / 2, -object.h / 2, object.w, object.h, 6);
   ctx.fill();
   ctx.stroke();
   ctx.shadowBlur = 0;
-  ctx.fillStyle = "rgba(5, 10, 28, 0.28)";
-  for (let y = -object.h / 2 + 12; y < object.h / 2; y += 16) {
-    ctx.fillRect(-object.w / 2 + 8, y, object.w - 16, 4);
+
+  ctx.save();
+  roundRect(-object.w / 2 + 5, -object.h / 2 + 5, object.w - 10, object.h - 10, 4);
+  ctx.clip();
+  ctx.fillStyle = "rgba(255, 76, 86, 0.92)";
+  for (let x = -object.w; x < object.w; x += 24) {
+    ctx.beginPath();
+    ctx.moveTo(x, object.h / 2);
+    ctx.lineTo(x + 16, object.h / 2);
+    ctx.lineTo(x + 52, -object.h / 2);
+    ctx.lineTo(x + 36, -object.h / 2);
+    ctx.closePath();
+    ctx.fill();
   }
-  ctx.fillStyle = "rgba(255, 107, 107, 0.9)";
-  ctx.beginPath();
-  ctx.moveTo(-22, -8);
-  ctx.lineTo(0, -28);
-  ctx.lineTo(22, -8);
-  ctx.closePath();
-  ctx.fill();
+  ctx.fillStyle = "rgba(243, 246, 255, 0.92)";
+  for (let x = -object.w + 12; x < object.w; x += 24) {
+    ctx.beginPath();
+    ctx.moveTo(x, object.h / 2);
+    ctx.lineTo(x + 16, object.h / 2);
+    ctx.lineTo(x + 52, -object.h / 2);
+    ctx.lineTo(x + 36, -object.h / 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.fillStyle = "rgba(5, 10, 28, 0.78)";
+  ctx.font = "900 22px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("!", 0, 8);
   ctx.restore();
 }
 
@@ -417,6 +455,19 @@ function drawCar() {
   ctx.shadowColor = "rgba(72, 202, 255, 0.45)";
   ctx.shadowBlur = 20;
 
+  const beam = ctx.createLinearGradient(0, -34, 0, -214);
+  beam.addColorStop(0, "rgba(72, 202, 255, 0.34)");
+  beam.addColorStop(0.45, "rgba(72, 202, 255, 0.17)");
+  beam.addColorStop(1, "rgba(72, 202, 255, 0)");
+  ctx.fillStyle = beam;
+  ctx.beginPath();
+  ctx.moveTo(-17, -32);
+  ctx.lineTo(-92, -214);
+  ctx.lineTo(92, -214);
+  ctx.lineTo(17, -32);
+  ctx.closePath();
+  ctx.fill();
+
   ctx.fillStyle = "#a8c7ff";
   roundRect(-car.w / 2, -car.h / 2, car.w, car.h, 13);
   ctx.fill();
@@ -426,24 +477,13 @@ function drawCar() {
   ctx.fillStyle = "rgba(243, 246, 255, 0.88)";
   ctx.fillRect(-15, -35, 30, 7);
   ctx.fillStyle = colors.cyan;
-  ctx.fillRect(-17, 24, 10, 9);
-  ctx.fillRect(7, 24, 10, 9);
+  ctx.fillRect(-16, -34, 8, 8);
+  ctx.fillRect(8, -34, 8, 8);
   ctx.fillStyle = "rgba(5, 10, 28, 0.78)";
   ctx.fillRect(-27, -22, 5, 16);
   ctx.fillRect(22, -22, 5, 16);
   ctx.fillRect(-27, 11, 5, 16);
   ctx.fillRect(22, 11, 5, 16);
-
-  const beam = ctx.createLinearGradient(0, -36, 0, -175);
-  beam.addColorStop(0, "rgba(72, 202, 255, 0.25)");
-  beam.addColorStop(1, "rgba(72, 202, 255, 0)");
-  ctx.fillStyle = beam;
-  ctx.beginPath();
-  ctx.moveTo(-23, -34);
-  ctx.lineTo(0, -190);
-  ctx.lineTo(23, -34);
-  ctx.closePath();
-  ctx.fill();
   ctx.restore();
 }
 
@@ -459,13 +499,13 @@ function drawHud() {
   ctx.font = "700 18px Inter, Arial, sans-serif";
   ctx.fillText("Talent Driver", 32, 46);
   ctx.fillStyle = colors.muted;
-  ctx.font = "500 12px Inter, Arial, sans-serif";
-  ctx.fillText(`SCORE ${String(world.score).padStart(4, "0")}`, 32, 68);
+  ctx.font = "700 10px Inter, Arial, sans-serif";
+  ctx.fillText("ROUTE TO TDM", 32, 68);
   drawHearts(174, 37);
   if (world.combo > 1) {
     ctx.fillStyle = colors.cyan;
-    ctx.font = "800 10px Inter, Arial, sans-serif";
-    ctx.fillText(`x${world.combo}`, 238, 68);
+    ctx.font = "800 11px Inter, Arial, sans-serif";
+    ctx.fillText(`SPEED x${world.combo}`, 226, 68);
   }
 
   ctx.textAlign = "right";
@@ -630,114 +670,109 @@ function drawIntro() {
   ctx.fillRect(0, 0, base.w, base.h);
 
   ctx.fillStyle = colors.text;
-  ctx.font = "700 42px Inter, Arial, sans-serif";
-  ctx.fillText("Talent", 38, 86);
-  ctx.font = "700 42px Inter, Arial, sans-serif";
-  ctx.fillText("Driver", 38, 138);
+  ctx.font = "700 41px Inter, Arial, sans-serif";
+  ctx.fillText("Talent", 30, 74);
+  ctx.font = "700 41px Inter, Arial, sans-serif";
+  ctx.fillText("Driver", 30, 124);
   ctx.fillStyle = colors.muted;
-  ctx.font = "500 13px Inter, Arial, sans-serif";
-  ctx.fillText("\u041F\u043E\u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0439 \u0441\u0435\u0431\u044F \u0437\u0430 \u0440\u0443\u043B\u0451\u043C", 40, 164);
-  ctx.fillText("Talent Development Machine", 40, 183);
+  ctx.font = "500 12px Inter, Arial, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("\u041F\u043E\u0447\u0443\u0432\u0441\u0442\u0432\u0443\u0439 \u0441\u0435\u0431\u044F", 360, 78);
+  ctx.fillText("\u0437\u0430 \u0440\u0443\u043B\u0451\u043C Talent", 360, 96);
+  ctx.fillText("Development Machine", 360, 114);
+  ctx.textAlign = "left";
 
-  drawHeroPlate(28, 214, 334, 122);
+  drawHeroPlate(0, 168, base.w, 158);
 
   ctx.fillStyle = "rgba(8, 17, 38, 0.9)";
-  roundRect(28, 390, 334, 224, 24);
+  roundRect(28, 378, 334, 224, 24);
   ctx.fill();
   ctx.strokeStyle = "rgba(72, 202, 255, 0.24)";
   ctx.stroke();
 
   ctx.fillStyle = colors.cyan;
   ctx.font = "800 12px Inter, Arial, sans-serif";
-  ctx.fillText("MISSION", 52, 424);
+  ctx.fillText("MISSION", 52, 412);
   ctx.fillStyle = colors.text;
   ctx.font = "800 27px Inter, Arial, sans-serif";
-  ctx.fillText("\u0421\u043E\u0431\u0435\u0440\u0438 7", 52, 462);
-  ctx.fillText("TDM-\u0431\u043B\u043E\u043A\u043E\u0432", 52, 496);
+  ctx.fillText("\u0421\u043E\u0431\u0435\u0440\u0438 7", 52, 450);
+  ctx.fillText("TDM-\u0431\u043B\u043E\u043A\u043E\u0432", 52, 484);
 
   ctx.fillStyle = colors.muted;
   ctx.font = "500 14px Inter, Arial, sans-serif";
-  drawRule("\u2190 \u2192", "\u043C\u0435\u043D\u044F\u0439 \u043F\u043E\u043B\u043E\u0441\u0443", 52, 536);
-  drawRule("\u25CF", "\u043B\u043E\u0432\u0438 \u0431\u043B\u043E\u043A\u0438 \u0438 \u0441\u0435\u0440\u0438\u044E", 52, 565);
-  drawRule("\u25A3", "\u043F\u0440\u043E\u0441\u043A\u0430\u043A\u0438\u0432\u0430\u0439 \u0432 \u0432\u043E\u0440\u043E\u0442\u0430", 52, 594);
+  drawRule("\u2190 \u2192", "\u043C\u0435\u043D\u044F\u0439 \u043D\u0430\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435", 52, 524);
+  drawRule("\u25CF", "\u043B\u043E\u0432\u0438 \u0431\u043B\u043E\u043A\u0438", 52, 553);
+  drawRule("!", "\u043E\u0431\u044A\u0435\u0437\u0436\u0430\u0439 \u043F\u0440\u0435\u043F\u044F\u0442\u0441\u0442\u0432\u0438\u044F", 52, 582);
 
-  drawMiniRoad(268, 438);
+  drawMiniRoad(268, 426);
   ctx.restore();
 }
 
 function drawHeroPlate(x, y, w, h) {
   ctx.save();
-  roundRect(x, y, w, h, 22);
-  ctx.clip();
   const bgGradient = ctx.createLinearGradient(x, y, x + w, y + h);
   bgGradient.addColorStop(0, "#050a1c");
-  bgGradient.addColorStop(0.58, "#071332");
+  bgGradient.addColorStop(0.48, "#071332");
   bgGradient.addColorStop(1, "#030716");
   ctx.fillStyle = bgGradient;
   ctx.fillRect(x, y, w, h);
 
-  const horizonY = y + 48;
+  const horizonY = y + 54;
   const band = ctx.createLinearGradient(x, horizonY, x + w, horizonY + 34);
-  band.addColorStop(0, "#0b49ff");
-  band.addColorStop(0.5, "#20d8ff");
-  band.addColorStop(1, "#0751ff");
+  band.addColorStop(0, "#0954ff");
+  band.addColorStop(0.48, "#20dfff");
+  band.addColorStop(1, "#0754ff");
   ctx.fillStyle = band;
-  ctx.fillRect(x, horizonY, w, 34);
+  ctx.fillRect(x, horizonY, w, 42);
 
-  ctx.fillStyle = "rgba(5, 10, 28, 0.58)";
+  ctx.fillStyle = "rgba(8, 28, 82, 0.78)";
   ctx.beginPath();
-  ctx.moveTo(x, horizonY + 34);
-  for (let i = 0; i <= 11; i += 1) {
-    const px = x + (w / 10) * i;
-    const py = horizonY + 18 + ((i * 17) % 24);
+  ctx.moveTo(x, horizonY + 42);
+  for (let i = 0; i <= 12; i += 1) {
+    const px = x + (w / 11) * i;
+    const py = horizonY + 18 + ((i * 23) % 24);
     ctx.lineTo(px, py);
   }
-  ctx.lineTo(x + w, horizonY + 34);
+  ctx.lineTo(x + w, horizonY + 42);
   ctx.closePath();
   ctx.fill();
 
-  const blobGradient = ctx.createRadialGradient(x + 190, y + 54, 8, x + 192, y + 52, 86);
-  blobGradient.addColorStop(0, "#2df3ff");
-  blobGradient.addColorStop(0.34, "#148cff");
-  blobGradient.addColorStop(0.78, "#082aff");
+  const blobGradient = ctx.createRadialGradient(x + w * 0.57, y + 66, 8, x + w * 0.56, y + 66, 118);
+  blobGradient.addColorStop(0, "#36f3ff");
+  blobGradient.addColorStop(0.36, "#1190ff");
+  blobGradient.addColorStop(0.76, "#0734ff");
   blobGradient.addColorStop(1, "#020b3d");
   ctx.fillStyle = blobGradient;
-  ctx.shadowColor = "#0a77ff";
-  ctx.shadowBlur = 24;
+  ctx.shadowColor = "#0d8cff";
+  ctx.shadowBlur = 32;
   ctx.save();
-  ctx.translate(x + 192, y + 56);
-  ctx.rotate(-0.2);
+  ctx.translate(x + w * 0.55, y + 70);
+  ctx.rotate(-0.16);
   ctx.beginPath();
-  ctx.ellipse(0, 0, 76, 30, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 0, 110, 39, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
   ctx.shadowBlur = 0;
 
   ctx.fillStyle = "#f3fbff";
   ctx.beginPath();
-  ctx.moveTo(x + 198, y + 38);
-  ctx.lineTo(x + 205, y + 57);
-  ctx.lineTo(x + 224, y + 64);
-  ctx.lineTo(x + 205, y + 71);
-  ctx.lineTo(x + 198, y + 90);
-  ctx.lineTo(x + 191, y + 71);
-  ctx.lineTo(x + 172, y + 64);
-  ctx.lineTo(x + 191, y + 57);
+  ctx.moveTo(x + w * 0.55, y + 42);
+  ctx.lineTo(x + w * 0.58, y + 66);
+  ctx.lineTo(x + w * 0.64, y + 74);
+  ctx.lineTo(x + w * 0.58, y + 82);
+  ctx.lineTo(x + w * 0.55, y + 108);
+  ctx.lineTo(x + w * 0.52, y + 82);
+  ctx.lineTo(x + w * 0.46, y + 74);
+  ctx.lineTo(x + w * 0.52, y + 66);
   ctx.closePath();
   ctx.fill();
 
   const fade = ctx.createLinearGradient(x, y, x, y + h);
   fade.addColorStop(0, "rgba(5, 10, 28, 0.04)");
-  fade.addColorStop(1, "rgba(5, 10, 28, 0.55)");
+  fade.addColorStop(0.74, "rgba(5, 10, 28, 0.08)");
+  fade.addColorStop(1, "rgba(5, 10, 28, 0.76)");
   ctx.fillStyle = fade;
   ctx.fillRect(x, y, w, h);
-  ctx.restore();
-
-  ctx.save();
-  ctx.strokeStyle = "rgba(72, 202, 255, 0.22)";
-  ctx.lineWidth = 1.5;
-  roundRect(x, y, w, h, 22);
-  ctx.stroke();
   ctx.restore();
 }
 
@@ -826,7 +861,7 @@ function drawEndState() {
   ctx.fillText("activated", base.w / 2, 428);
   ctx.fillStyle = colors.muted;
   ctx.font = "400 14px Inter, Arial, sans-serif";
-  ctx.fillText(`score ${world.score}`, base.w / 2, 456);
+  ctx.fillText("7/7 building blocks", base.w / 2, 456);
   drawFoundList();
   ctx.restore();
 }
