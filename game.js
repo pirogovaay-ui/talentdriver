@@ -171,6 +171,11 @@ function spawnHazard() {
     ? lanes.map((_, index) => index).filter((index) => index !== openLane)
     : [Math.floor(Math.random() * lanes.length)];
 
+  objects = objects.filter((object) => {
+    if (object.type !== "wall") return true;
+    return !(object.y > -230 && object.y < 130);
+  });
+
   blockedLanes.forEach((lane, index) => {
     objects.push({
       type: "wall",
@@ -185,6 +190,7 @@ function spawnHazard() {
 
   const pace = Math.max(1.05, 1.85 - world.found.size * 0.09 - world.score / 9000);
   world.hazardTimer = pace + Math.random() * 0.7;
+  keepHazardsFair();
 }
 
 function update(dt) {
@@ -235,6 +241,7 @@ function update(dt) {
     }
   }
   objects = objects.filter((object) => object.y < base.h + 70);
+  keepHazardsFair();
 
   for (const object of objects) {
     if (object.type !== "wall" || object.scored || object.taken) continue;
@@ -283,6 +290,19 @@ function update(dt) {
       }
     }
   }
+}
+
+function keepHazardsFair() {
+  const walls = objects.filter((object) => object.type === "wall" && !object.taken);
+  for (const wall of walls) {
+    const cluster = walls.filter((other) => Math.abs(other.y - wall.y) < 86);
+    const lanesBlocked = new Set(cluster.map((object) => object.lane));
+    if (lanesBlocked.size < 3) continue;
+    const laneToOpen = Math.abs(car.x - lanes[0]) < Math.abs(car.x - lanes[2]) ? 0 : 2;
+    const remove = cluster.find((object) => object.lane === laneToOpen) || cluster[cluster.length - 1];
+    remove.taken = true;
+  }
+  objects = objects.filter((object) => !object.taken || object.type !== "wall");
 }
 
 function rectsOverlap(a, b) {
