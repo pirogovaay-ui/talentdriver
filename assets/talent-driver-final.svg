@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-label="Talent Driver final screen">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#07113a"/>
+      <stop offset=".42" stop-color="#0a75ff"/>
+      <stop offset=".63" stop-color="#091b9c"/>
+      <stop offset="1" stop-color="#050a1c"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="66%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#49f0ff"/>
+      <stop offset=".4" stop-color="#0e6bff"/>
+      <stop offset=".76" stop-color="#061bd5"/>
+      <stop offset="1" stop-color="#050a1c"/>
+    </radialGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="1.8"/>
+    </filter>
+    <filter id="grain">
+      <feTurbulence baseFrequency=".86" numOctaves="2" seed="11" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .13"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="#050a1c"/>
+  <rect y="205" width="1280" height="118" fill="url(#sky)"/>
+  <g fill="#07145d" opacity=".86">
+    <path d="M0 324 105 274l74 37 70-46 116 59Z"/>
+    <path d="M235 324 373 255l99 52 105-67 134 84Z"/>
+    <path d="M608 324 775 250l135 61 104-72 266 85Z"/>
+  </g>
+  <g fill="#1787ff" opacity=".46">
+    <path d="M0 324 122 288l56 26 80-30 90 40Z"/>
+    <path d="M355 324 462 282l82 30 96-39 104 51Z"/>
+    <path d="M795 324 906 287l78 28 126-46 170 55Z"/>
+  </g>
+  <ellipse cx="640" cy="254" rx="246" ry="82" transform="rotate(-13 640 254)" fill="url(#orb)"/>
+  <ellipse cx="640" cy="254" rx="246" ry="82" transform="rotate(-13 640 254)" fill="#19d8ff" opacity=".15" filter="url(#soft)"/>
+  <path d="M640 182 660 234 714 254 660 274 640 326 620 274 566 254 620 234Z" fill="#f4fbff"/>
+  <text x="640" y="433" text-anchor="middle" fill="#f3f6ff" font-family="Inter, Arial, sans-serif" font-size="24">&#1057;&#1090;&#1072;&#1088;&#1090; &#1087;&#1088;&#1086;&#1075;&#1088;&#1072;&#1084;&#1084;&#1099;</text>
+  <text x="640" y="511" text-anchor="middle" fill="#00a8ff" font-family="Inter, Arial, sans-serif" font-size="45" font-weight="500">Talent Driver</text>
+  <text x="640" y="560" text-anchor="middle" fill="#f3f6ff" font-family="Inter, Arial, sans-serif" font-size="28">&#1090;&#1072; &#1089;&#1072;&#1084;&#1072;&#1103; &#1087;&#1088;&#1086;&#1075;&#1088;&#1072;&#1084;&#1084;&#1072; &#1086; &#1090;&#1086;&#1084;, &#1082;&#1072;&#1082; &#1073;&#1099;&#1090;&#1100;</text>
+  <text x="640" y="598" text-anchor="middle" fill="#f3f6ff" font-family="Inter, Arial, sans-serif" font-size="28">&#1079;&#1072; &#1088;&#1091;&#1083;&#1105;&#1084; Talent Development Machine</text>
+  <rect width="1280" height="720" filter="url(#grain)" opacity=".55"/>
+</svg>
