@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" role="img" aria-label="Talent Driver dark blue training slide background">
+  <defs>
+    <radialGradient id="beam" cx="74%" cy="55%" r="44%">
+      <stop offset="0" stop-color="#22bfff" stop-opacity=".62"/>
+      <stop offset=".42" stop-color="#1168ff" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#050a1c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="stage" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#050a1c"/>
+      <stop offset=".52" stop-color="#06102b"/>
+      <stop offset="1" stop-color="#020614"/>
+    </linearGradient>
+    <filter id="grain">
+      <feTurbulence baseFrequency=".78" numOctaves="2" seed="7" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .16"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="url(#stage)"/>
+  <circle cx="730" cy="352" r="318" fill="none" stroke="#113e9d" stroke-opacity=".32" stroke-width="92"/>
+  <circle cx="730" cy="352" r="202" fill="none" stroke="#133680" stroke-opacity=".22" stroke-width="72"/>
+  <path d="M1028 512 756 330" stroke="#28c8ff" stroke-width="42" stroke-linecap="round" stroke-opacity=".42"/>
+  <path d="M1028 512 764 337" stroke="#37e5ff" stroke-width="18" stroke-linecap="round" stroke-opacity=".46"/>
+  <rect width="1280" height="720" fill="url(#beam)"/>
+  <circle cx="1032" cy="532" r="66" fill="#21bfff" opacity=".7"/>
+  <ellipse cx="1032" cy="564" rx="102" ry="28" fill="#0b5cff" opacity=".36"/>
+  <path d="M1053 471c22 15 27 44 25 92h-20c1-48-4-70-17-80-11 18-26 35-45 52l-14-15c28-25 49-49 58-72l13 23Z" fill="#020614"/>
+  <circle cx="1048" cy="432" r="13" fill="#020614"/>
+  <path d="M1041 449h26l-4 72h-18l-4-72Z" fill="#020614"/>
+  <rect width="1280" height="720" filter="url(#grain)" opacity=".55"/>
+</svg>
