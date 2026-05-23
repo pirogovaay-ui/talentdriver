@@ -41,10 +41,13 @@ const world = {
   crashed: false,
   lastTime: 0,
   distance: 0,
-  speed: 118,
+  speed: 142,
   targetLane: 1,
   found: new Set(),
   lives: 3,
+  score: 0,
+  combo: 1,
+  invincible: 0,
   label: "",
   labelTimer: 0,
   pausedForBlock: false,
@@ -54,7 +57,8 @@ const world = {
   blockPauseIndex: 0,
   blockFlyProgress: 0,
   hitShake: 0,
-  spawnTimer: 0,
+  hazardTimer: 0,
+  blockTimer: 0,
   nextBlock: 0,
   blockQueue: [],
   scroll: 0,
@@ -83,10 +87,13 @@ function resetGame() {
   world.crashed = false;
   world.lastTime = performance.now();
   world.distance = 0;
-  world.speed = 118;
+  world.speed = 142;
   world.targetLane = 1;
   world.found = new Set();
   world.lives = 3;
+  world.score = 0;
+  world.combo = 1;
+  world.invincible = 0;
   world.label = "";
   world.labelTimer = 0;
   world.pausedForBlock = false;
@@ -96,7 +103,8 @@ function resetGame() {
   world.blockPauseIndex = 0;
   world.blockFlyProgress = 0;
   world.hitShake = 0;
-  world.spawnTimer = 1.45;
+  world.hazardTimer = 1.05;
+  world.blockTimer = 5.2;
   world.nextBlock = 0;
   world.blockQueue = blockNames.map((_, index) => index);
   world.scroll = 0;
@@ -107,41 +115,57 @@ function resetGame() {
   controls.classList.remove("hidden");
 }
 
-function scheduleObject() {
-  if (world.blockQueue.length > 0) {
-    const blockIndex = world.blockQueue.shift();
-    const safeLane = Math.floor(Math.random() * lanes.length);
-    objects.push({
-      type: "block",
-      index: blockIndex,
-      lane: safeLane,
-      x: lanes[safeLane],
-      y: -64,
-      w: 48,
-      h: 48,
-    });
+function spawnBlock() {
+  if (world.blockQueue.length === 0) return;
+  const blockIndex = world.blockQueue.shift();
+  const safeLane = Math.floor(Math.random() * lanes.length);
+  objects.push({
+    type: "block",
+    index: blockIndex,
+    lane: safeLane,
+    x: lanes[safeLane],
+    y: -64,
+    w: 48,
+    h: 48,
+  });
 
+  if (world.found.size > 0) {
     const obstacleLane = (safeLane + 1 + Math.floor(Math.random() * 2)) % lanes.length;
-    if (world.found.size > 0) {
-      objects.push({
-        type: "wall",
-        lane: obstacleLane,
-        x: lanes[obstacleLane],
-        y: -330,
-        w: 68,
-        h: 58,
-      });
-    }
-    world.nextBlock = Math.max(world.nextBlock, blockIndex + 1);
-    world.spawnTimer = 6.4 + Math.random() * 2.8;
-    return;
+    objects.push({
+      type: "wall",
+      lane: obstacleLane,
+      x: lanes[obstacleLane],
+      y: -260,
+      w: 68,
+      h: 58,
+    });
   }
 
-  if (Math.random() < 0.5) {
-    const lane = Math.floor(Math.random() * lanes.length);
-    objects.push({ type: "wall", lane, x: lanes[lane], y: -92, w: 68, h: 58 });
-  }
-  world.spawnTimer = 2.6 + Math.random() * 1.4;
+  world.nextBlock = Math.max(world.nextBlock, blockIndex + 1);
+  world.blockTimer = 7.4 + Math.random() * 3.2;
+}
+
+function spawnHazard() {
+  const openLane = Math.floor(Math.random() * lanes.length);
+  const isGate = world.found.size > 1 && Math.random() < 0.58;
+  const blockedLanes = isGate
+    ? lanes.map((_, index) => index).filter((index) => index !== openLane)
+    : [Math.floor(Math.random() * lanes.length)];
+
+  blockedLanes.forEach((lane, index) => {
+    objects.push({
+      type: "wall",
+      lane,
+      x: lanes[lane],
+      y: -92 - index * 34,
+      w: 68,
+      h: 58,
+      scored: false,
+    });
+  });
+
+  const pace = Math.max(1.05, 1.85 - world.found.size * 0.09 - world.score / 9000);
+  world.hazardTimer = pace + Math.random() * 0.7;
 }
 
 function update(dt) {
@@ -165,12 +189,15 @@ function update(dt) {
 
   world.distance += world.speed * dt;
   world.scroll = (world.scroll + world.speed * dt) % 92;
-  world.speed = Math.min(156, world.speed + dt * 1.2);
+  world.speed = Math.min(236, world.speed + dt * (3.1 + world.found.size * 0.25));
   world.labelTimer = Math.max(0, world.labelTimer - dt);
   world.hitShake = Math.max(0, world.hitShake - dt);
-  world.spawnTimer -= dt;
+  world.invincible = Math.max(0, world.invincible - dt);
+  world.hazardTimer -= dt;
+  world.blockTimer -= dt;
 
-  if (world.spawnTimer <= 0) scheduleObject();
+  if (world.hazardTimer <= 0) spawnHazard();
+  if (world.blockTimer <= 0) spawnBlock();
 
   const targetX = lanes[world.targetLane];
   car.x += (targetX - car.x) * Math.min(1, dt * 12);
@@ -185,10 +212,18 @@ function update(dt) {
       !world.blockQueue.includes(object.index)
     ) {
       world.blockQueue.unshift(object.index);
-      world.spawnTimer = Math.min(world.spawnTimer, 1.35);
+      world.blockTimer = Math.min(world.blockTimer, 4.8);
     }
   }
   objects = objects.filter((object) => object.y < base.h + 70);
+
+  for (const object of objects) {
+    if (object.type !== "wall" || object.scored || object.taken) continue;
+    if (object.y > car.y + car.h / 2) {
+      object.scored = true;
+      world.score += 8 * world.combo;
+    }
+  }
 
   const carBox = { x: car.x - car.w / 2, y: car.y - car.h / 2, w: car.w, h: car.h };
   for (const object of objects) {
@@ -199,6 +234,8 @@ function update(dt) {
     object.taken = true;
     if (object.type === "block") {
       world.found.add(object.index);
+      world.score += 120 + world.combo * 30;
+      world.combo = Math.min(9, world.combo + 1);
       world.label = blockNames[object.index];
       world.labelTimer = 0;
       world.pausedForBlock = true;
@@ -208,8 +245,14 @@ function update(dt) {
       world.blockPauseIndex = object.index;
       world.blockFlyProgress = 0;
       continueButton.classList.remove("hidden");
+      if (world.found.size === blockNames.length) {
+      }
     } else {
+      if (world.invincible > 0) continue;
       world.lives -= 1;
+      world.combo = 1;
+      world.invincible = 1.1;
+      world.speed = Math.max(128, world.speed - 34);
       world.label = "\u0423\u0414\u0410\u0420 \u041E \u0421\u0422\u0415\u041D\u0423";
       world.labelTimer = 0.8;
       world.hitShake = 0.38;
@@ -370,6 +413,7 @@ function drawWall(object) {
 function drawCar() {
   ctx.save();
   ctx.translate(car.x, car.y);
+  if (world.invincible > 0 && Math.floor(performance.now() / 90) % 2 === 0) ctx.globalAlpha = 0.45;
   ctx.shadowColor = "rgba(72, 202, 255, 0.45)";
   ctx.shadowBlur = 20;
 
@@ -416,8 +460,13 @@ function drawHud() {
   ctx.fillText("Talent Driver", 32, 46);
   ctx.fillStyle = colors.muted;
   ctx.font = "500 12px Inter, Arial, sans-serif";
-  ctx.fillText("Route to TDM", 32, 68);
+  ctx.fillText(`SCORE ${String(world.score).padStart(4, "0")}`, 32, 68);
   drawHearts(174, 37);
+  if (world.combo > 1) {
+    ctx.fillStyle = colors.cyan;
+    ctx.font = "800 10px Inter, Arial, sans-serif";
+    ctx.fillText(`x${world.combo}`, 238, 68);
+  }
 
   ctx.textAlign = "right";
   ctx.fillStyle = colors.blueSoft;
@@ -624,8 +673,8 @@ function drawIntro() {
   ctx.fillStyle = colors.muted;
   ctx.font = "500 14px Inter, Arial, sans-serif";
   drawRule("\u2190 \u2192", "\u043C\u0435\u043D\u044F\u0439 \u043F\u043E\u043B\u043E\u0441\u0443", 52, 536);
-  drawRule("\u25CF", "\u043B\u043E\u0432\u0438 \u0441\u0438\u043D\u0438\u0435 \u0431\u043B\u043E\u043A\u0438", 52, 565);
-  drawRule("\u25A3", "\u043E\u0431\u044A\u0435\u0437\u0436\u0430\u0439 \u0441\u0442\u0435\u043D\u044B", 52, 594);
+  drawRule("\u25CF", "\u043B\u043E\u0432\u0438 \u0431\u043B\u043E\u043A\u0438 \u0438 \u0441\u0435\u0440\u0438\u044E", 52, 565);
+  drawRule("\u25A3", "\u043F\u0440\u043E\u0441\u043A\u0430\u043A\u0438\u0432\u0430\u0439 \u0432 \u0432\u043E\u0440\u043E\u0442\u0430", 52, 594);
 
   drawMiniRoad(268, 438);
   ctx.restore();
@@ -716,7 +765,7 @@ function drawEndState() {
   ctx.fillText("activated", base.w / 2, 428);
   ctx.fillStyle = colors.muted;
   ctx.font = "400 14px Inter, Arial, sans-serif";
-  ctx.fillText("7/7 building blocks found", base.w / 2, 456);
+  ctx.fillText(`score ${world.score}`, base.w / 2, 456);
   drawFoundList();
   ctx.restore();
 }
